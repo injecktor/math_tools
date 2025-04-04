@@ -47,6 +47,7 @@ public:
 
     matrix_t operator+(matrix_t other);
     matrix_t operator-(matrix_t other);
+    matrix_t operator*(matrix_t other);
 
 private:
     size_t rows_count, columns_count;
@@ -176,5 +177,20 @@ matrix_t<T> matrix_t<T>::operator-(matrix_t other) {
     MATRIX_FOR {
         result[row][column] = (*this)[row][column] - other[row][column];
     }
+    return result;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::operator*(matrix_t other) {
+    if (columns_count != other.get_rows_count()) {
+        assert(false && "Can't multiply matrix with incorrect sizes");
+    }
+    matrix_t result(rows_count, other.get_columns_count());
+    for (size_t i = 0; i < rows_count; i++) {
+        for (size_t j = 0; j < other.get_columns_count(); j++) {
+            result[i][j] += values[i][j]
+        }
+    }
+    
     return result;
 }
