@@ -5,7 +5,7 @@
 
 #define VEC2TOVEC1(row, column, columns_count) (row * columns_count + column)
 
-#define MATRIX_FOR \
+#define MATRIX_FOR(rows_count, columns_count) \
     for (size_t row = 0; row < rows_count; row++) \
         for (size_t column = 0; column < columns_count; column++)
 
@@ -30,10 +30,9 @@ public:
     bool append_column();
     bool append_column(vector<T> a_values);
 
-    template<typename I_T>
-    vector<T>& operator[](I_T a_row) {
-        return values[a_row];
-    }
+    size_t det();
+
+
 
     string get_matrix_to_print();
 
@@ -45,9 +44,16 @@ public:
         return columns_count;
     }
 
+    template<typename I_T>
+    vector<T>& operator[](I_T a_row) {
+        return values[a_row];
+    }
+
     matrix_t operator+(matrix_t other);
     matrix_t operator-(matrix_t other);
     matrix_t operator*(matrix_t other);
+    matrix_t operator+=(matrix_t other);
+    matrix_t operator-=(matrix_t other);
 
 private:
     size_t rows_count, columns_count;
@@ -74,7 +80,7 @@ bool matrix_t<T>::fill(vector<T> a_values) {
     if (a_values.size() != rows_count * columns_count) {
         return false;
     }
-    MATRIX_FOR {
+    MATRIX_FOR(rows_count, columns_count) {
         values[row][column] = a_values[VEC2TOVEC1(row, column, columns_count)];
     }
     return true;
@@ -139,6 +145,36 @@ bool matrix_t<T>::append_column(vector<T> a_values) {
 }
 
 template <class T>
+size_t matrix_t<T>::det() {
+    if (rows_count != columns_count) {
+        printf("Impossible to evaluate determinant for not squere matrix\n");
+    }
+    if (rows_count == 2) {
+        return (*this)[0][0] * (*this)[1][1] - (*this)[0][1] * (*this)[1][0];
+    }
+    size_t result = 0;
+    for (size_t i = 0; i < columns_count; i++) {
+        matrix_t<T> tmp(rows_count - 1, columns_count - 1);
+        for (size_t row = 0; row < rows_count - 1; row++) {
+            T minus = 0;
+            for (size_t column = 0; column < columns_count; column++) {
+                if (column == i) {
+                    minus = 1;
+                    continue;
+                }
+                tmp[row][column - minus] = values[row + 1][column];
+            }
+        }
+        if (i & 0b1) {
+            result -= values[0][i] * tmp.det();
+        } else {
+            result += values[0][i] * tmp.det();
+        }
+    }
+    return result;
+}
+
+template <class T>
 string matrix_t<T>::get_matrix_to_print() {
     string result;
     for (size_t row = 0; row < rows_count; row++) {
@@ -161,7 +197,7 @@ matrix_t<T> matrix_t<T>::operator+(matrix_t other) {
         assert(false && "Can't add matrixes with different sizes");
     }
     matrix_t result(rows_count, columns_count);
-    MATRIX_FOR {
+    MATRIX_FOR(rows_count, columns_count) {
         result[row][column] = (*this)[row][column] + other[row][column];
     }
     return result;
@@ -174,7 +210,7 @@ matrix_t<T> matrix_t<T>::operator-(matrix_t other) {
         assert(false && "Can't add matrixes with different sizes");
     }
     matrix_t result(rows_count, columns_count);
-    MATRIX_FOR {
+    MATRIX_FOR(rows_count, columns_count) {
         result[row][column] = (*this)[row][column] - other[row][column];
     }
     return result;
@@ -188,9 +224,34 @@ matrix_t<T> matrix_t<T>::operator*(matrix_t other) {
     matrix_t result(rows_count, other.get_columns_count());
     for (size_t i = 0; i < rows_count; i++) {
         for (size_t j = 0; j < other.get_columns_count(); j++) {
-            result[i][j] += values[i][j]
+            for (size_t k = 0; k < columns_count; k++) {
+                printf("our: %u, other: %u\n",  values[i][k], other[k][i]);
+                result[i][j] += values[i][k] * other[k][j];
+            }
         }
     }
     
     return result;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::operator+=(matrix_t other) {
+    if (rows_count != other.get_rows_count() 
+        || columns_count != other.get_columns_count()) {
+        assert(false && "Can't add matrixes with different sizes");
+    }
+    MATRIX_FOR(rows_count, columns_count) {
+        (*this)[row][column] += other[row][column];
+    }
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::operator-=(matrix_t other) {
+    if (rows_count != other.get_rows_count() 
+        || columns_count != other.get_columns_count()) {
+        assert(false && "Can't add matrixes with different sizes");
+    }
+    MATRIX_FOR(rows_count, columns_count) {
+        (*this)[row][column] -= other[row][column];
+    }
 }
