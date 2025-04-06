@@ -14,8 +14,8 @@ using namespace std;
 template <class T>
 class matrix_t {
 public:
+    matrix_t() = default;
     // Square matrix
-    matrix_t() {};
     matrix_t(size_t a_side);
     matrix_t(size_t a_rows_count, size_t a_columns_count);
     matrix_t(size_t a_rows_count, size_t a_columns_count, vector<T> a_values);
@@ -31,8 +31,15 @@ public:
     bool append_column(vector<T> a_values);
 
     size_t det();
-
-
+    size_t rank();
+    matrix_t<T> transpose();
+    matrix_t<T> minor();
+    matrix_t<T> cofactors();
+    matrix_t<T> adjugate();
+    matrix_t<double> reciprocal();
+    bool is_invertible() {
+        return det() != 0;
+    }
 
     string get_matrix_to_print();
 
@@ -49,11 +56,16 @@ public:
         return values[a_row];
     }
 
-    matrix_t operator+(matrix_t other);
-    matrix_t operator-(matrix_t other);
-    matrix_t operator*(matrix_t other);
-    matrix_t operator+=(matrix_t other);
-    matrix_t operator-=(matrix_t other);
+    matrix_t operator+(matrix_t a_other);
+    matrix_t operator-(matrix_t a_other);
+    matrix_t operator*(matrix_t a_other);
+    matrix_t operator*(T a_number);
+    matrix_t operator/(T a_number);
+    matrix_t operator+=(matrix_t a_other);
+    matrix_t operator-=(matrix_t a_other);
+    matrix_t operator*=(matrix_t a_other);
+    matrix_t operator*=(T a_number);
+    matrix_t operator/=(T a_number);
 
 private:
     size_t rows_count, columns_count;
@@ -147,7 +159,10 @@ bool matrix_t<T>::append_column(vector<T> a_values) {
 template <class T>
 size_t matrix_t<T>::det() {
     if (rows_count != columns_count) {
-        printf("Impossible to evaluate determinant for not squere matrix\n");
+        assert(false && "Impossible to evaluate determinant for not square matrix\n");
+    }
+    if (rows_count == 1) {
+        return (*this)[0][0];
     }
     if (rows_count == 2) {
         return (*this)[0][0] * (*this)[1][1] - (*this)[0][1] * (*this)[1][0];
@@ -175,6 +190,83 @@ size_t matrix_t<T>::det() {
 }
 
 template <class T>
+size_t matrix_t<T>::rank() {
+    if (rows_count != columns_count) {
+        assert(false && "Inpossible to evaluate rank of non square matrix");
+    }
+    return rows_count;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::transpose() {
+    matrix_t<T> result(columns_count, rows_count);
+    MATRIX_FOR(rows_count, columns_count) {
+        result[column][row] = values[row][column];
+    }
+    return result;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::minor() {
+    matrix_t<T> result(rows_count, columns_count);
+    if (rows_count != columns_count) {
+        assert(false && "Impossible to evaluate minor for not square matrix\n");
+    }
+    for (size_t i = 0; i < rows_count; i++) {
+        for (size_t j = 0; j < columns_count; j++) {
+            matrix_t<T> tmp(rows_count - 1, columns_count - 1);
+            T row_minus = 0, column_minus = 0;
+            MATRIX_FOR(rows_count, columns_count) {
+                if (row == i) {
+                    row_minus = 1;
+                    continue;
+                }
+                if (column == j) {
+                    column_minus = 1;
+                    continue;
+                }
+                tmp[row - row_minus][column - column_minus] = values[row][column];
+            }
+            result[i][j] = tmp.det();
+        }
+    }
+    return result;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::cofactors() {
+    matrix_t<T> result(rows_count, columns_count);
+    result = minor();
+    MATRIX_FOR(rows_count, columns_count) {
+        if ((row + column) & 0b1) {
+            result[row][column] *= -1;
+        }
+    }
+    return result;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::adjugate() {
+    matrix_t<T> result(*this);
+    return result.cofactors().transpose();
+}
+
+template <class T>
+matrix_t<double> matrix_t<T>::reciprocal() {
+    T det_value = det();
+    if (det_value == 0) {
+        assert(false && "Matrix is not invertable");
+    }
+    matrix_t<double> result(rows_count, columns_count);
+    matrix_t<T> evaluated(rows_count, columns_count);
+    evaluated = adjugate();
+    MATRIX_FOR(rows_count, columns_count) {
+        result[row][column] = static_cast<double>(evaluated[row][column]);
+    }
+    return result / det_value;
+}
+
+template <class T>
 string matrix_t<T>::get_matrix_to_print() {
     string result;
     for (size_t row = 0; row < rows_count; row++) {
@@ -191,42 +283,41 @@ string matrix_t<T>::get_matrix_to_print() {
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator+(matrix_t other) {
-    if (rows_count != other.get_rows_count() 
-        || columns_count != other.get_columns_count()) {
+matrix_t<T> matrix_t<T>::operator+(matrix_t a_other) {
+    if (rows_count != a_other.get_rows_count() 
+        || columns_count != a_other.get_columns_count()) {
         assert(false && "Can't add matrixes with different sizes");
     }
     matrix_t result(rows_count, columns_count);
     MATRIX_FOR(rows_count, columns_count) {
-        result[row][column] = (*this)[row][column] + other[row][column];
+        result[row][column] = (*this)[row][column] + a_other[row][column];
     }
     return result;
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator-(matrix_t other) {
-    if (rows_count != other.get_rows_count() 
-        || columns_count != other.get_columns_count()) {
+matrix_t<T> matrix_t<T>::operator-(matrix_t a_other) {
+    if (rows_count != a_other.get_rows_count() 
+        || columns_count != a_other.get_columns_count()) {
         assert(false && "Can't add matrixes with different sizes");
     }
     matrix_t result(rows_count, columns_count);
     MATRIX_FOR(rows_count, columns_count) {
-        result[row][column] = (*this)[row][column] - other[row][column];
+        result[row][column] = (*this)[row][column] - a_other[row][column];
     }
     return result;
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator*(matrix_t other) {
-    if (columns_count != other.get_rows_count()) {
+matrix_t<T> matrix_t<T>::operator*(matrix_t a_other) {
+    if (columns_count != a_other.get_rows_count()) {
         assert(false && "Can't multiply matrix with incorrect sizes");
     }
-    matrix_t result(rows_count, other.get_columns_count());
+    matrix_t result(rows_count, a_other.get_columns_count());
     for (size_t i = 0; i < rows_count; i++) {
-        for (size_t j = 0; j < other.get_columns_count(); j++) {
+        for (size_t j = 0; j < a_other.get_columns_count(); j++) {
             for (size_t k = 0; k < columns_count; k++) {
-                printf("our: %u, other: %u\n",  values[i][k], other[k][i]);
-                result[i][j] += values[i][k] * other[k][j];
+                result[i][j] += values[i][k] * a_other[k][j];
             }
         }
     }
@@ -235,23 +326,44 @@ matrix_t<T> matrix_t<T>::operator*(matrix_t other) {
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator+=(matrix_t other) {
-    if (rows_count != other.get_rows_count() 
-        || columns_count != other.get_columns_count()) {
-        assert(false && "Can't add matrixes with different sizes");
-    }
+matrix_t<T> matrix_t<T>::operator*(T a_number) {
+    matrix_t result(rows_count, columns_count);
     MATRIX_FOR(rows_count, columns_count) {
-        (*this)[row][column] += other[row][column];
+        values[row][column] *= a_number;
     }
+    return result;
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator-=(matrix_t other) {
-    if (rows_count != other.get_rows_count() 
-        || columns_count != other.get_columns_count()) {
-        assert(false && "Can't add matrixes with different sizes");
-    }
+matrix_t<T> matrix_t<T>::operator/(T a_number) {
+    matrix_t result(*this);
     MATRIX_FOR(rows_count, columns_count) {
-        (*this)[row][column] -= other[row][column];
+        result[row][column] /= a_number;
     }
+    return result;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::operator+=(matrix_t a_other) {
+    *this = *this + a_other;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::operator-=(matrix_t a_other) {
+    *this = *this - a_other;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::operator*=(matrix_t a_other) {
+    *this = *this * a_other;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::operator*=(T a_value) {
+    *this = *this * a_value;
+}
+
+template <class T>
+matrix_t<T> matrix_t<T>::operator/=(T a_value) {
+    *this = *this / a_value;
 }
