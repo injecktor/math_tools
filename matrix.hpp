@@ -30,15 +30,15 @@ public:
     bool append_column();
     bool append_column(vector<T> a_values);
 
-    size_t det();
+    T det();
     size_t rank();
     matrix_t<T> transpose();
     matrix_t<T> minor();
     matrix_t<T> cofactors();
     matrix_t<T> adjugate();
-    matrix_t<double> reciprocal();
+    matrix_t<T> reciprocal();
     bool is_invertible() {
-        return det() != 0;
+        return det() != static_cast<T>(0);
     }
 
     string get_matrix_to_print();
@@ -157,7 +157,7 @@ bool matrix_t<T>::append_column(vector<T> a_values) {
 }
 
 template <class T>
-size_t matrix_t<T>::det() {
+T matrix_t<T>::det() {
     if (rows_count != columns_count) {
         assert(false && "Impossible to evaluate determinant for not square matrix\n");
     }
@@ -167,7 +167,7 @@ size_t matrix_t<T>::det() {
     if (rows_count == 2) {
         return (*this)[0][0] * (*this)[1][1] - (*this)[0][1] * (*this)[1][0];
     }
-    size_t result = 0;
+    T result = 0;
     for (size_t i = 0; i < columns_count; i++) {
         matrix_t<T> tmp(rows_count - 1, columns_count - 1);
         for (size_t row = 0; row < rows_count - 1; row++) {
@@ -252,17 +252,13 @@ matrix_t<T> matrix_t<T>::adjugate() {
 }
 
 template <class T>
-matrix_t<double> matrix_t<T>::reciprocal() {
+matrix_t<T> matrix_t<T>::reciprocal() {
     T det_value = det();
     if (det_value == 0) {
         assert(false && "Matrix is not invertable");
     }
-    matrix_t<double> result(rows_count, columns_count);
-    matrix_t<T> evaluated(rows_count, columns_count);
-    evaluated = adjugate();
-    MATRIX_FOR(rows_count, columns_count) {
-        result[row][column] = static_cast<double>(evaluated[row][column]);
-    }
+    matrix_t<T> result(*this);
+    result = adjugate();
     return result / det_value;
 }
 

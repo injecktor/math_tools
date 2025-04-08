@@ -1,3 +1,4 @@
 .vscode
 matrix.*
-test_matrix.cpp
+matrix
+matrix_test*
