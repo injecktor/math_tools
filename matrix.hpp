@@ -9,7 +9,7 @@
     for (size_t row = 0; row < rows_count; row++) \
         for (size_t column = 0; column < columns_count; column++)
 
-using namespace std;
+namespace math_tools {
 
 template <class T>
 class matrix_t {
@@ -18,17 +18,17 @@ public:
     // Square matrix
     matrix_t(size_t a_side);
     matrix_t(size_t a_rows_count, size_t a_columns_count);
-    matrix_t(size_t a_rows_count, size_t a_columns_count, vector<T> a_values);
+    matrix_t(size_t a_rows_count, size_t a_columns_count, std::vector<T> a_values);
 
-    bool fill(vector<T> a_values);
-    bool change_row(size_t a_row, vector<T> a_values);
-    bool change_column(size_t a_column, vector<T> a_values);
+    bool fill(std::vector<T> a_values);
+    bool change_row(size_t a_row, std::vector<T> a_values);
+    bool change_column(size_t a_column, std::vector<T> a_values);
 
     bool append_row();
-    bool append_row(vector<T> a_values);
+    bool append_row(std::vector<T> a_values);
 
     bool append_column();
-    bool append_column(vector<T> a_values);
+    bool append_column(std::vector<T> a_values);
 
     T det();
     size_t rank();
@@ -41,7 +41,7 @@ public:
         return det() != static_cast<T>(0);
     }
 
-    string get_matrix_to_print();
+    std::string get_matrix_to_print();
 
     size_t get_rows_count() {
         return rows_count;
@@ -52,7 +52,7 @@ public:
     }
 
     template<typename I_T>
-    vector<T>& operator[](I_T a_row) {
+    std::vector<T>& operator[](I_T a_row) {
         return values[a_row];
     }
 
@@ -69,7 +69,7 @@ public:
 
 private:
     size_t rows_count, columns_count;
-    vector<vector<T>> values;
+    std::vector<std::vector<T>> values;
 };
 
 template <class T>
@@ -82,13 +82,13 @@ matrix_t<T>::matrix_t(size_t a_rows_count, size_t a_columns_count)
 }
 
 template <class T>
-matrix_t<T>::matrix_t(size_t a_rows_count, size_t a_columns_count, vector<T> a_values)
+matrix_t<T>::matrix_t(size_t a_rows_count, size_t a_columns_count, std::vector<T> a_values)
     : matrix_t(a_rows_count, a_columns_count) {
     assert(fill(a_values) && "Fill failed");
 }
 
 template <class T>
-bool matrix_t<T>::fill(vector<T> a_values) {
+bool matrix_t<T>::fill(std::vector<T> a_values) {
     if (a_values.size() != rows_count * columns_count) {
         return false;
     }
@@ -99,7 +99,7 @@ bool matrix_t<T>::fill(vector<T> a_values) {
 }
 
 template <class T>
-bool matrix_t<T>::change_row(size_t a_row, vector<T> a_values) {
+bool matrix_t<T>::change_row(size_t a_row, std::vector<T> a_values) {
     if (a_row >= rows_count || a_values.size() != columns_count) {
         return false;
     }
@@ -110,7 +110,7 @@ bool matrix_t<T>::change_row(size_t a_row, vector<T> a_values) {
 }
 
 template <class T>
-bool matrix_t<T>::change_column(size_t a_column, vector<T> a_values) {
+bool matrix_t<T>::change_column(size_t a_column, std::vector<T> a_values) {
     if (a_column >= columns_count || a_values.size() != rows_count) {
         return false;
     }
@@ -122,13 +122,13 @@ bool matrix_t<T>::change_column(size_t a_column, vector<T> a_values) {
 
 template <class T>
 bool matrix_t<T>::append_row() {
-    vector<T> tmp_row;
+    std::vector<T> tmp_row;
     tmp_row.resize(columns_count);
     return append_row(tmp_row);
 }
 
 template <class T>
-bool matrix_t<T>::append_row(vector<T> a_values) {
+bool matrix_t<T>::append_row(std::vector<T> a_values) {
     if (a_values.size() != columns_count) {
         return false;
     }
@@ -139,13 +139,13 @@ bool matrix_t<T>::append_row(vector<T> a_values) {
 
 template <class T>
 bool matrix_t<T>::append_column() {
-    vector<T> tmp_column;
+    std::vector<T> tmp_column;
     tmp_column.resize(rows_count);
     return append_row(tmp_column);
 }
 
 template <class T>
-bool matrix_t<T>::append_column(vector<T> a_values) {
+bool matrix_t<T>::append_column(std::vector<T> a_values) {
     if (a_values.size() != rows_count) {
         return false;
     }
@@ -263,15 +263,15 @@ matrix_t<T> matrix_t<T>::reciprocal() {
 }
 
 template <class T>
-string matrix_t<T>::get_matrix_to_print() {
-    string result;
+std::string matrix_t<T>::get_matrix_to_print() {
+    std::string result;
     for (size_t row = 0; row < rows_count; row++) {
         result += "( ";
         for (size_t column = 0; column < columns_count; column++) {
             if (column != 0) {
                 result += "\t";
             }
-            result += to_string(values[row][column]);
+            result += std::to_string(values[row][column]);
         }
         result += " )\n";
     }
@@ -362,4 +362,6 @@ matrix_t<T> matrix_t<T>::operator*=(T a_value) {
 template <class T>
 matrix_t<T> matrix_t<T>::operator/=(T a_value) {
     *this = *this / a_value;
+}
+
 }
