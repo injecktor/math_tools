@@ -255,7 +255,7 @@ template <class T>
 matrix_t<T> matrix_t<T>::reciprocal() {
     T det_value = det();
     if (det_value == 0) {
-        assert(false && "Matrix is not invertable");
+        assert(false && "Matrix is not invertible");
     }
     matrix_t<T> result(*this);
     result = adjugate();
