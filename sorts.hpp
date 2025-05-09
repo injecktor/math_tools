@@ -1,5 +1,12 @@
 namespace math_tools {
     template<class T>
+    void swap(T* left, T* right) {
+        T tmp = *left;
+        *left = *right;
+        *right = tmp;
+    }
+
+    template<class T>
     void bubble_sort(T* start, T* end) {
         if (start >= end) return;
         T* max_ptr = end;
@@ -60,6 +67,21 @@ namespace math_tools {
     }
 
     template<class T>
+    static T* fast_sort_part(T* start, T* end) {
+        T *pivot = (end - start) / 2 / T_size * T_size;
+        while (start <= end) {
+            while (*start < *pivot) start++;
+            while (*end > *pivot) end--;
+            if (start <= end) {
+                math_tools::swap(start, end);
+                start++;
+                end--;
+            }
+        }
+        return start;
+    }
+
+    template<class T, uint64_t T_size = sizeof(T)>
     void fast_sort(T* start, T* end) {
         if (start >= end) return;
         T* new_start = fast_sort_part(start, end);
