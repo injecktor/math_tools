@@ -45,28 +45,38 @@ namespace math_tools {
     }
 
     template<class T, size_t T_size = sizeof(T)>
-    static T* fast_sort_part(T* start, T* end) {
+    void fast_sort(T* start, T* end) {
+        if (start >= end) return;
         auto start_num = reinterpret_cast<size_t>(start);
         auto end_num = reinterpret_cast<size_t>(end);
         auto pivot = reinterpret_cast<T*>(((start_num + end_num) >> 1) & ~(T_size - 1));
-        while (start <= end) {
-            while (*start < *pivot) start++;
-            while (*end > *pivot) end--;
-            if (start <= end) {
-                math_tools::swap(start, end);
-                start++;
-                end--;
+        T *left = start, *right = end;
+        while (left <= right) {
+            while (*left < *pivot) left++;
+            while (*right > *pivot) right--;
+            if (left <= right) {
+                math_tools::swap(left, right);
+                left++;
+                right--;
             }
         }
-        return start;
+        fast_sort(start, left - 1);
+        fast_sort(left, end);
     }
 
-    template<class T>
-    void fast_sort(T* start, T* end) {
+    template<class T, size_t T_size = sizeof(T)>
+    void lomuto_sort(T* start, T* end) {
         if (start >= end) return;
-        T* new_start = fast_sort_part(start, end);
-        fast_sort(start, new_start - 1);
-        fast_sort(new_start, end);
+        T* left = start;
+        for (T* current = left; current < end; current++) {
+            if (*current < *end) {
+                math_tools::swap(current, left);
+                left++;
+            }
+        }
+        math_tools::swap(left, end);
+        lomuto_sort(start, left - 1);
+        lomuto_sort(left, end);
     }
     
 }
