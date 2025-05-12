@@ -13,7 +13,7 @@ std::vector<std::complex<V>>& dft(const std::vector<T>& input) {
     }
     double step = 6.28318530718 / n;
     std::complex<double> w(cos(step), sin(-step));
-    
+
     for (size_t i = 0; i < n; i++) {
         for (size_t j = 0; j < n; j++) {
             result[i] += std::pow(w, i * j) * input_complex[j];
@@ -22,93 +22,90 @@ std::vector<std::complex<V>>& dft(const std::vector<T>& input) {
     return result;
 }
 
-// QVector<double> idft() {
-//     QVector<ComplexNum> comRes;
-//     QVector<double> res;
+template<class T, class V>
+std::vector<V>& idft(const std::vector<std::complex<T>>& input) {
+    size_t n = input.size();
+    std::vector<std::complex<V>> result_complex;
+    result_complex.resize(n);
+    std::vector<V> result;
+    result.resize(n / 2);
+    double step = 6.28318530718 / n;
+    std::complex<double> w(cos(step), sin(step));
 
-//     comRes.resize(N);
+    for (int i = 0; i < n / 2; i++) {
+        for (int j = 0; j < n; j++) {
+            result_complex[i] += std::pow(w, i * j) * input[j];
+        }
+        result_complex[i] /= n;
+        result[i] = result_complex[i].real;
+    }
+    return result;
+}
 
-//     ComplexNum w(cos(2 * PI / N), sin(2 * PI / N));
+template<class T, class V>
+std::vector<std::complex<V>>& fft(const std::vector<T>& input) {
+    std::vector<std::complex<T>> input_complex;
+    for (const auto&& elem : input) {
+        input_complex.emplace_back(elem, 0);
+    }
+    for (const auto&& elem : input) {
+        input_complex.emplace_back(elem, 0);
+    }
+    
+    fft_alg(&input_complex);
+    return input_complex;
+}
 
-//     for (int k = 0; k < N / 2; k++) {
-//         for (int j = 0; j < N; j++) {
-//             comRes[k] = comRes[k] + w.power(k * j) * complexfft[j];
-//         }
-//         comRes[k] = comRes[k] / N;
-//         res.push_back(comRes[k].real);
-//     }
+template<class T, class V>
+std::vector<V>& ifft(const std::vector<std::complex<T>>& input) {
+    size_t n = input.size();
+    auto tmp = const_cast<std::vector<std::complex<T>>&>(input);
+    fft_alg(&tmp, true);
 
-//     return res;
-// }
+    std::vector<V> result;
+    result.reserve(n / 2);
+    for (int i = 0; i < n / 2; ++i) {
+        result.push_back(tmp[i].real);
+    }
+    return result;
+}
 
-// void fft(QVector<double> signal) {
-//     for (int i = 0; i < signal.size(); i++) {
-//         complexfft.push_back(ComplexNum(signal[i], 0));
-//         // x_out[i] *= 1; // Window
-//     }
+template<class T>
+static void fft_alg(std::vector<std::complex<T>>* input, bool is_invert) {
+    int n = input->size();
+    if (n <= 1) {
+        return;
+    }
 
-//     for (int i = 0; i < signal.size(); i++) {
-//         complexfft.push_back(ComplexNum(signal[i], 0));
-//         // x_out[i] *= 1; // Window
-//     }
+    std::vector<std::complex<T>> odd;
+    std::vector<std::complex<T>> even;
+    odd.resize(n / 2);
+    even.resize(n / 2);
+    for (int i = 0; i < n / 2; i++) {
+        even[i] = (*input)[2*i];
+        odd[i] = (*input)[2*i+1];
+    }
 
-//     //fft algorithm
-//     fft_alg(&complexfft);
+    fft_alg(&even);
+    fft_alg(&odd);
 
-//     for (int var = 0; var < N / 2; ++var) {
-//         ComplexNum tmp = complexfft[var];
-//         doublefft.push_back(sqrt(tmp.real * tmp.real + tmp.imag * tmp.imag));
-//     }
-// }
+    std::complex<double> w;
+    double step = 6.28318530718 / n;
 
-// QVector<double> ifft() {
-//     QVector<ComplexNum> tmp;
-//     tmp = complexfft;
+    w.real = cos(step);
+    if (is_invert) {
+        w.imag = sin(step);
+    } else {
+        w.imag = sin(-step);
+    }
 
-//     fft_alg(&tmp, true);
-
-//     QVector<double> res;
-//     for (int var = 0; var < N / 2; ++var) {
-//         res.push_back(tmp.at(var).real);
-//     }
-//     return res;
-// }
-
-// static void fft_alg(QVector<ComplexNum>* signal, bool isInvert) {
-//     //check if it's splitted enough
-//     int n = signal->size();
-//     if (n <= 1) {
-//         return;
-//     }
-
-//     //split even and odd
-//     QVector<ComplexNum> odd;
-//     QVector<ComplexNum> even;
-//     odd.resize(n / 2);
-//     even.resize(n / 2);
-//     for (int i = 0; i < n / 2; i++) {
-//         even[i] = signal->at(2*i);
-//         odd[i] = signal->at(2*i+1);
-//     }
-
-//     fft_alg(&even);
-//     fft_alg(&odd);
-
-//     ComplexNum w;
-
-//     //calculate FFT
-//     if (isInvert)
-//         w = ComplexNum(cos(2 * PI / n), sin(2 * PI / n));
-//     else
-//         w = ComplexNum(cos(2 * PI / n), sin(-2 * PI / n));
-
-//     for (int k = 0; k < n / 2; k++) {
-//         ComplexNum t = w.power(k) * odd[k];
-//         (*signal)[k] = even.at(k) + t;
-//         (*signal)[n / 2 + k] = even.at(k) - t;
-//         if (isInvert) {
-//             (*signal)[k] = (*signal)[k] / N * (-1);
-//             (*signal)[n / 2 + k] = (*signal)[n / 2 + k] / N * (-1);
-//         }
-//     }
-// }
+    for (int i = 0; i < n / 2; i++) {
+        std::complex<T> t = std::pow(w, i) * odd[i];
+        (*input)[i] = even[i] + t;
+        (*input)[n / 2 + i] = even[i] - t;
+        if (is_invert) {
+            (*input)[i] = (*input)[i] / n * (-1);
+            (*input)[n / 2 + i] = (*input)[n / 2 + i] / n * (-1);
+        }
+    }
+}
