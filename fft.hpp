@@ -1,6 +1,8 @@
 #include <complex>
 #include <vector>
 
+namespace math_tools {
+
 template<class T, class V>
 std::vector<std::complex<V>>& dft(const std::vector<T>& input) {
     size_t n = input.size();
@@ -108,4 +110,6 @@ static void fft_alg(std::vector<std::complex<T>>* input, bool is_invert) {
             (*input)[n / 2 + i] = (*input)[n / 2 + i] / n * (-1);
         }
     }
+}
+
 }
