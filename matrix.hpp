@@ -56,16 +56,22 @@ public:
         return values[a_row];
     }
 
-    matrix_t operator+(matrix_t a_other);
-    matrix_t operator-(matrix_t a_other);
-    matrix_t operator*(matrix_t a_other);
+    template <class V>
+    matrix_t operator+(matrix_t<V> a_other);
+    template <class V>
+    matrix_t operator-(matrix_t<V> a_other);
+    template <class V>
+    matrix_t<T> operator*(matrix_t<V> a_other);
     matrix_t operator*(T a_number);
     matrix_t operator/(T a_number);
-    matrix_t operator+=(matrix_t a_other);
-    matrix_t operator-=(matrix_t a_other);
-    matrix_t operator*=(matrix_t a_other);
-    matrix_t operator*=(T a_number);
-    matrix_t operator/=(T a_number);
+    template <class V>
+    void operator+=(matrix_t<V> a_other);
+    template <class V>
+    void operator-=(matrix_t<V> a_other);
+    template <class V>
+    void operator*=(matrix_t<V> a_other);
+    void operator*=(T a_number);
+    void operator/=(T a_number);
 
 private:
     size_t rows_count, columns_count;
@@ -279,12 +285,13 @@ std::string matrix_t<T>::get_matrix_to_print() {
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator+(matrix_t a_other) {
+template <class V>
+matrix_t<T> matrix_t<T>::operator+(matrix_t<V> a_other) {
     if (rows_count != a_other.get_rows_count() 
         || columns_count != a_other.get_columns_count()) {
         assert(false && "Can't add matrixes with different sizes");
     }
-    matrix_t result(rows_count, columns_count);
+    matrix_t<T> result(rows_count, columns_count);
     MATRIX_FOR(rows_count, columns_count) {
         result[row][column] = (*this)[row][column] + a_other[row][column];
     }
@@ -292,12 +299,13 @@ matrix_t<T> matrix_t<T>::operator+(matrix_t a_other) {
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator-(matrix_t a_other) {
+template <class V>
+matrix_t<T> matrix_t<T>::operator-(matrix_t<V> a_other) {
     if (rows_count != a_other.get_rows_count() 
         || columns_count != a_other.get_columns_count()) {
         assert(false && "Can't add matrixes with different sizes");
     }
-    matrix_t result(rows_count, columns_count);
+    matrix_t<T> result(rows_count, columns_count);
     MATRIX_FOR(rows_count, columns_count) {
         result[row][column] = (*this)[row][column] - a_other[row][column];
     }
@@ -305,11 +313,12 @@ matrix_t<T> matrix_t<T>::operator-(matrix_t a_other) {
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator*(matrix_t a_other) {
+template <class V>
+matrix_t<T> matrix_t<T>::operator*(matrix_t<V> a_other) {
     if (columns_count != a_other.get_rows_count()) {
         assert(false && "Can't multiply matrix with incorrect sizes");
     }
-    matrix_t result(rows_count, a_other.get_columns_count());
+    matrix_t<T> result(rows_count, a_other.get_columns_count());
     for (size_t i = 0; i < rows_count; i++) {
         for (size_t j = 0; j < a_other.get_columns_count(); j++) {
             for (size_t k = 0; k < columns_count; k++) {
@@ -340,27 +349,30 @@ matrix_t<T> matrix_t<T>::operator/(T a_number) {
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator+=(matrix_t a_other) {
+template <class V>
+void matrix_t<T>::operator+=(matrix_t<V> a_other) {
     *this = *this + a_other;
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator-=(matrix_t a_other) {
+template <class V>
+void matrix_t<T>::operator-=(matrix_t<V> a_other) {
     *this = *this - a_other;
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator*=(matrix_t a_other) {
+template <class V>
+void matrix_t<T>::operator*=(matrix_t<V> a_other) {
     *this = *this * a_other;
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator*=(T a_value) {
+void matrix_t<T>::operator*=(T a_value) {
     *this = *this * a_value;
 }
 
 template <class T>
-matrix_t<T> matrix_t<T>::operator/=(T a_value) {
+void matrix_t<T>::operator/=(T a_value) {
     *this = *this / a_value;
 }
 
