@@ -2,3 +2,4 @@
 #include "common.hpp"
 #include "sorts.hpp"
 #include "fft.hpp"
+#include "hashes.hpp"
