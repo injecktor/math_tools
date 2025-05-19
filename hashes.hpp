@@ -10,5 +10,6 @@ namespace math_tools {
     CRC-32/XZ
     */
     extern unsigned int crc32(unsigned char *buf, unsigned long len);
+    extern unsigned int crc32_fast(unsigned char *buf, unsigned long len);
 
 }
