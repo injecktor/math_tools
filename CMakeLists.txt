@@ -11,5 +11,5 @@ add_executable(math_tools
 )
 
 target_include_directories(math_tools PRIVATE 
-        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_DIR}
 )
