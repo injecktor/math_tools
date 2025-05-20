@@ -16,7 +16,7 @@ inline endianness_t math_tools::get_host_endian() {
     return host;
 }
 
-inline short math_tools::htobe16(short data) {
+inline short math_tools::htob16(short data) {
     short result = data;
     if (host == math_tools::endianness_t::unknown) {
         math_tools::get_host_endian();
@@ -27,7 +27,7 @@ inline short math_tools::htobe16(short data) {
     return result;
 }
 
-inline short math_tools::htole16(short data) {
+inline short math_tools::htol16(short data) {
     short result = data;
     if (host == math_tools::endianness_t::unknown) {
         math_tools::get_host_endian();
@@ -38,7 +38,7 @@ inline short math_tools::htole16(short data) {
     return result;
 }
 
-inline int math_tools::htobe32(int data) {
+inline int math_tools::htob32(int data) {
     int result = data;
     if (host == math_tools::endianness_t::unknown) {
         math_tools::get_host_endian();
@@ -50,7 +50,7 @@ inline int math_tools::htobe32(int data) {
     return result;
 }
 
-inline int math_tools::htole32(int data) {
+inline int math_tools::htol32(int data) {
     int result = data;
     if (host == math_tools::endianness_t::unknown) {
         math_tools::get_host_endian();
