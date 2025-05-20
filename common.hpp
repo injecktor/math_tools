@@ -6,11 +6,11 @@ namespace math_tools {
         big
     };
 
-    extern inline endianness_t get_host_endian();
-    extern inline short htob16(short data);
-    extern inline short htol16(short data);
-    extern inline int htob32(int data);
-    extern inline int htol32(int data);
+    extern endianness_t get_host_endian();
+    extern short htob16(short data);
+    extern short htol16(short data);
+    extern int htob32(int data);
+    extern int htol32(int data);
 
     template<class T>
     T border(T value, T min, T max) {
