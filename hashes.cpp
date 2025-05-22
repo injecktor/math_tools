@@ -16,7 +16,7 @@ unsigned int math_tools::crc32(unsigned char *buf, unsigned long len) {
     return crc ^ 0xffffffffUL;
 }
 
-unsigned int math_tools::crc32_fast(unsigned char *buf, unsigned long len) {
+unsigned int math_tools::crc32_fast(unsigned char *buf, unsigned long len, unsigned long start_crc) {
     static bool crc_computed = false;
     static unsigned long global_crc_table[256];
     unsigned long crc;
@@ -28,7 +28,7 @@ unsigned int math_tools::crc32_fast(unsigned char *buf, unsigned long len) {
             global_crc_table[i] = crc;
         }
     }
-    crc = 0xffffffffUL;
+    crc = start_crc;
     while (len--) {
         crc = global_crc_table[(crc ^ *buf++) & 0xff] ^ (crc >> 8);
     }
