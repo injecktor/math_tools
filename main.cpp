@@ -6,8 +6,8 @@ using namespace std;
 using namespace math_tools;
 
 int main() {
-    int a = 0x11223344;
-    printf("%08x\n", htol32(a));
+    unsigned char a[255] = "AAAAAAAAAA";
+    printf("%08x\n", crc32_fast(a, 10));
 
 
     return 0;
